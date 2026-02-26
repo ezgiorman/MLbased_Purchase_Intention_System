@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satın Alım Tahmini – Analiz Paneli</title>
+    <meta name="description"
+        content="E-ticaret satın alma niyeti tahmin paneli. Gerçek zamanlı kullanıcı davranış analizi ve makine öğrenmesi tabanlı tahminler." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-body: #f8f9fc;
+            --bg-white: #ffffff;
+            --bg-soft: #f1f3f8;
+            --bg-sidebar: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+
+            --coral: #ff6b6b;
+            --coral-soft: rgba(255, 107, 107, 0.10);
+            --amber: #f59e0b;
+            --amber-soft: rgba(245, 158, 11, 0.10);
+            --teal: #14b8a6;
+            --teal-soft: rgba(20, 184, 166, 0.10);
+            --blue: #3b82f6;
+            --blue-soft: rgba(59, 130, 246, 0.10);
+            --purple: #8b5cf6;
+            --purple-soft: rgba(139, 92, 246, 0.10);
+            --pink: #ec4899;
+            --pink-soft: rgba(236, 72, 153, 0.10);
+            --green: #22c55e;
+            --green-soft: rgba(34, 197, 94, 0.10);
+            --red: #ef4444;
+            --red-soft: rgba(239, 68, 68, 0.10);
+
+            --text-primary: #1e1b4b;
+            --text-secondary: #4b5563;
+            --text-tertiary: #9ca3af;
+            --text-muted: #d1d5db;
+            --text-white: #ffffff;
+
+            --border-light: rgba(0, 0, 0, 0.06);
+            --border-default: rgba(0, 0, 0, 0.08);
+
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
+            --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.05);
+            --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
+
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 999px;
+
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-w: 264px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ═══════ SIDEBAR ═══════ */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--bg-sidebar);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 8px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--coral), var(--amber));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .logo-text-main {
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+
+        .logo-text-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .nav-section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: rgba(255, 255, 255, 0.35);
+            padding: 16px 12px 6px;
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: 1px solid transparent;
+        }
+
+        .nav-link .icon {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            border-radius: 0 4px 4px 0;
+            background: linear-gradient(180deg, var(--coral), var(--amber));
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 12px 4px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: var(--radius-full);
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 16px rgba(74, 222, 128, 0.9);
+            }
+        }
+
+        .sidebar-status span {
+            font-size: 12px;
+            font-weight: 500;
+            color: #4ade80;
+        }
+
+        .sidebar-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            line-height: 1.5;
+        }
+
+        /* ═══════ MAIN ═══════ */
+        .main {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            padding: 28px 32px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            max-width: 500px;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            background: var(--green-soft);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .live-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: #22c55e;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            border: 1px solid var(--border-default);
+            background: var(--bg-white);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--purple);
+            color: var(--purple);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--coral), #e11d48);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 16px rgba(255, 107, 107, 0.35);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px rgba(255, 107, 107, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ═══════ CONTENT ═══════ */
+        .content {
+            padding: 24px 32px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex: 1;
+        }
+
+        /* Metric Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            animation: fadeSlideUp 0.5s ease-out;
+        }
+
+        .metric-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-card);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .metric-card:nth-child(1)::before {
+            background: linear-gradient(90deg, var(--coral), var(--pink));
+        }
+
+        .metric-card:nth-child(2)::before {
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+        }
+
+        .metric-card:nth-child(3)::before {
+            background: linear-gradient(90deg, var(--teal), var(--green));
+        }
+
+        .metric-card:nth-child(4)::before {
+            background: linear-gradient(90deg, var(--amber), #f97316);
+        }
+
+        .metric-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .metric-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .metric-card:nth-child(1) .metric-icon {
+            background: var(--coral-soft);
+        }
+
+        .metric-card:nth-child(2) .metric-icon {
+            background: var(--blue-soft);
+        }
+
+        .metric-card:nth-child(3) .metric-icon {
+            background: var(--teal-soft);
+        }
+
+        .metric-card:nth-child(4) .metric-icon {
+            background: var(--amber-soft);
+        }
+
+        .metric-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+        }
+
+        .metric-trend.up {
+            color: #16a34a;
+            background: var(--green-soft);
+        }
+
+        .metric-trend.down {
+            color: var(--red);
+            background: var(--red-soft);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 4px;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .metric-card:nth-child(1) .metric-value {
+            color: var(--coral);
+        }
+
+        .metric-card:nth-child(2) .metric-value {
+            color: var(--blue);
+        }
+
+        .metric-card:nth-child(3) .metric-value {
+            color: var(--teal);
+        }
+
+        .metric-card:nth-child(4) .metric-value {
+            color: var(--amber);
+        }
+
+        .metric-sub {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        .sparkline-container {
+            height: 40px;
+            margin-top: 12px;
+        }
+
+        .sparkline-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 18px;
+            animation: fadeSlideUp 0.7s ease-out;
+        }
+
+        .chart-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-base);
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .chart-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-subtitle {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .chart-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--purple-soft);
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            color: var(--purple);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+        }
+
+        /* Bottom */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 18px;
+            animation: fadeSlideUp 0.9s ease-out;
+        }
+
+        .table-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-base);
+        }
+
+        .table-card:hover {
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .table-card-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .table-subtitle {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-soft);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        tbody tr {
+            transition: background var(--transition-fast);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-soft);
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .chip-positive {
+            background: var(--green-soft);
+            color: #16a34a;
+        }
+
+        .chip-negative {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .proba-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .proba-track {
+            flex: 1;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: var(--bg-soft);
+            overflow: hidden;
+        }
+
+        .proba-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .proba-fill.high {
+            background: linear-gradient(90deg, var(--teal), var(--green));
+        }
+
+        .proba-fill.low {
+            background: linear-gradient(90deg, var(--coral), var(--red));
+        }
+
+        .proba-text {
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 42px;
+            text-align: right;
+        }
+
+        /* Info Card */
+        .info-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .info-card-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: var(--bg-soft);
+            border: 1px solid var(--border-light);
+            transition: all var(--transition-fast);
+        }
+
+        .info-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .info-item-text h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .info-item-text p {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .info-item-value {
+            margin-left: auto;
+            font-size: 18px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 16px 32px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer a {
+            color: var(--purple);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Mobile */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--bg-white);
+            border: 1px solid var(--border-default);
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid,
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .header,
+            .content,
+            .footer {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .header {
+                padding-top: 56px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: var(--radius-full);
+        }
+    </style>
+    <script>if (window.self !== window.top) { var s = document.createElement('style'); s.textContent = '.sidebar,.mobile-menu-btn{display:none!important}.main{margin-left:0!important}'; document.head.appendChild(s) }</script>
+</head>
+
+<body>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç">☰</button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-icon">P</div>
+            <div>
+                <div class="logo-text-main">PurchasePredict</div>
+                <div class="logo-text-sub">Intelligence Suite</div>
+            </div>
+        </div>
+        <div>
+            <div class="nav-section-title">Ana Menü</div>
+            <ul class="nav-list">
+                <li><a href="/dashboard" class="nav-link active"><span class="icon">📊</span>Genel Bakış</a></li>
+                <li><a href="/realtime" class="nav-link"><span class="icon">⚡</span>Gerçek Zamanlı</a></li>
+                <li><a href="/analytics" class="nav-link"><span class="icon">📈</span>Analitik</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="nav-section-title">Araçlar</div>
+            <ul class="nav-list">
+                <li><a href="/realtime" class="nav-link"><span class="icon">🔮</span>Tekil Tahmin</a></li>
+                <li><a href="/analytics" class="nav-link"><span class="icon">🧪</span>A/B Test Raporu</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-status">
+                <div class="status-dot"></div>
+                <span>Model API aktif</span>
+            </div>
+            <p class="sidebar-desc">XGBoost tabanlı satın alma tahmin modeli ile gerçek zamanlı veri analizi.</p>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div class="header-left">
+                <h1>Satın Alma Niyeti Analiz Paneli</h1>
+                <p>Kullanıcı davranışları otomatik izlenir, oturum verileri ML modeli ile skorlanır ve sonuçlar panele
+                    yansıtılır.</p>
+                <div class="live-badge">
+                    <span class="dot"></span>
+                    Tahmin API'si çalışıyor — Canlı
+                </div>
+            </div>
+            <div class="header-actions">
+                <a class="btn" href="/analytics">📈 Kohort Analitiği</a>
+                <a class="btn btn-primary" href="/realtime">⚡ Canlı Tahminler</a>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- METRICS -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div class="metric-icon">📊</div>
+                        <div class="metric-trend up">▲ +0.6%</div>
+                    </div>
+                    <div class="metric-label">Dönüşüm Oranı</div>
+                    <div class="metric-value">3.8%</div>
+                    <div class="metric-sub">Son 7 günlük ortalama</div>
+                    <div class="sparkline-container"><canvas id="spark-1"></canvas></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div class="metric-icon">👥</div>
+                        <div class="metric-trend up">▲ +12%</div>
+                    </div>
+                    <div class="metric-label">Günlük Aktif Oturum</div>
+                    <div class="metric-value">18.420</div>
+                    <div class="metric-sub">Önceki haftaya göre</div>
+                    <div class="sparkline-container"><canvas id="spark-2"></canvas></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div class="metric-icon">🎯</div>
+                        <div class="metric-trend up">▲ Hedefte</div>
+                    </div>
+                    <div class="metric-label">Ort. Satın Alma Olasılığı</div>
+                    <div class="metric-value">0.42</div>
+                    <div class="metric-sub">Hedef: ≥ 0.40</div>
+                    <div class="sparkline-container"><canvas id="spark-3"></canvas></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div class="metric-icon">🛒</div>
+                        <div class="metric-trend down">▼ −5%</div>
+                    </div>
+                    <div class="metric-label">Terk Edilen Sepetler</div>
+                    <div class="metric-value">312</div>
+                    <div class="metric-sub">Yüksek niyet & satın almayan</div>
+                    <div class="sparkline-container"><canvas id="spark-4"></canvas></div>
+                </div>
+            </div>
+
+            <!-- CHARTS -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-title">Aylık Satın Alma Oranı Trendi</div>
+                            <div class="chart-subtitle">Feature: Month — Son 11 ayın tahmini satın alma oranları</div>
+                        </div>
+                        <div class="chart-badge">📅 Aylık</div>
+                    </div>
+                    <div class="chart-container"><canvas id="chart-month"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-title">Ziyaretçi Tipi Dağılımı</div>
+                            <div class="chart-subtitle">Feature: VisitorType — Segment bazlı katkı oranları</div>
+                        </div>
+                        <div class="chart-badge">👤 Segment</div>
+                    </div>
+                    <div class="chart-container"><canvas id="chart-visitor"></canvas></div>
+                </div>
+            </div>
+
+            <!-- BOTTOM -->
+            <div class="bottom-grid">
+                <div class="table-card">
+                    <div class="table-card-header">
+                        <div>
+                            <div class="table-title">Son Tahminler</div>
+                            <div class="table-subtitle">Model tarafından son skorlanan 8 oturum</div>
+                        </div>
+                        <a class="btn" href="/realtime" style="font-size:12px;padding:6px 14px;">Tümünü Gör →</a>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Oturum</th>
+                                <th>Segment</th>
+                                <th>Tahmin</th>
+                                <th>Olasılık</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-title">Model Performansı</div>
+                    <div class="info-item">
+                        <div class="info-item-icon" style="background:var(--coral-soft);">🏆</div>
+                        <div class="info-item-text">
+                            <h4>Model Doğruluğu</h4>
+                            <p>XGBoost — Test seti</p>
+                        </div>
+                        <div class="info-item-value" style="color:var(--coral);">89.2%</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-icon" style="background:var(--blue-soft);">📏</div>
+                        <div class="info-item-text">
+                            <h4>F1 Skoru</h4>
+                            <p>Precision-Recall dengesi</p>
+                        </div>
+                        <div class="info-item-value" style="color:var(--blue);">0.72</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-icon" style="background:var(--purple-soft);">🎯</div>
+                        <div class="info-item-text">
+                            <h4>AUC-ROC</h4>
+                            <p>Sınıflandırma eşiği bağımsız</p>
+                        </div>
+                        <div class="info-item-value" style="color:var(--purple);">0.93</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-icon" style="background:var(--teal-soft);">⚙️</div>
+                        <div class="info-item-text">
+                            <h4>Feature Sayısı</h4>
+                            <p>One-hot encoding sonrası</p>
+                        </div>
+                        <div class="info-item-value" style="color:var(--teal);">17</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-icon" style="background:var(--amber-soft);">📡</div>
+                        <div class="info-item-text">
+                            <h4>Ort. Yanıt Süresi</h4>
+                            <p>API latency</p>
+                        </div>
+                        <div class="info-item-value" style="color:var(--amber);">12ms</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <span>PurchasePredict Intelligence Suite © 2026</span>
+            <span>Powered by <a href="#">FastAPI</a> & <a href="#">Chart.js</a></span>
+        </footer>
+    </main>
+
+    <script>
+        function rand(min, max, dec = 0) { const f = Math.pow(10, dec); return Math.round((Math.random() * (max - min) + min) * f) / f; }
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('open'); });
+
+        function createSparkline(id, color, data) {
+            const c = document.getElementById(id); if (!c) return;
+            new Chart(c, {
+                type: 'line',
+                data: { labels: data.map((_, i) => i), datasets: [{ data, borderColor: color, borderWidth: 2, backgroundColor: color.replace('1)', '0.12)'), fill: true, tension: 0.4, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, animation: { duration: 1200 } }
+            });
+        }
+
+        function initCharts() {
+            const mCtx = document.getElementById('chart-month'); if (!mCtx) return;
+            const months = ['Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const mData = months.map(() => rand(2, 12, 1));
+            const g1 = mCtx.getContext('2d').createLinearGradient(0, 0, 0, 260);
+            g1.addColorStop(0, 'rgba(139, 92, 246, 0.20)'); g1.addColorStop(1, 'rgba(139, 92, 246, 0)');
+
+            new Chart(mCtx, {
+                type: 'line',
+                data: { labels: months, datasets: [{ label: 'Satın Alma Oranı (%)', data: mData, borderColor: '#8b5cf6', backgroundColor: g1, tension: 0.4, fill: true, pointRadius: 5, pointHoverRadius: 8, pointBackgroundColor: '#8b5cf6', pointBorderColor: '#fff', pointBorderWidth: 2, borderWidth: 3 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e1b4b', titleColor: '#fff', bodyColor: '#c4b5fd', padding: 12, cornerRadius: 10, callbacks: { label: ctx => `Oran: %${ctx.parsed.y.toFixed(1)}` } } },
+                    scales: {
+                        x: { ticks: { color: '#9ca3af', font: { size: 11, family: 'Inter' } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                        y: { ticks: { color: '#9ca3af', font: { size: 11 }, callback: v => `%${v}` }, grid: { color: 'rgba(0,0,0,0.04)' }, suggestedMin: 0, suggestedMax: 15 }
+                    },
+                    animation: { duration: 1500, easing: 'easeInOutQuart' }
+                }
+            });
+
+            const vCtx = document.getElementById('chart-visitor'); if (!vCtx) return;
+            new Chart(vCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Devamlı Müşteri', 'Yeni Müşteri', 'Diğer'],
+                    datasets: [{
+                        data: [64, 28, 8],
+                        backgroundColor: ['rgba(139,92,246,0.85)', 'rgba(255,107,107,0.85)', 'rgba(245,158,11,0.85)'],
+                        borderColor: ['#8b5cf6', '#ff6b6b', '#f59e0b'], borderWidth: 2, hoverOffset: 10, spacing: 4, borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '72%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#4b5563', font: { size: 12, weight: '600', family: 'Inter' }, padding: 16, usePointStyle: true, pointStyleWidth: 10 } },
+                        tooltip: { backgroundColor: '#1e1b4b', titleColor: '#fff', bodyColor: '#c4b5fd', padding: 12, cornerRadius: 10, callbacks: { label: ctx => ` ${ctx.label}: %${ctx.parsed}` } }
+                    },
+                    animation: { duration: 1500, animateRotate: true }
+                }
+            });
+        }
+
+        function renderRecentPredictions() {
+            const tbody = document.getElementById('recent-tbody'); if (!tbody) return;
+            tbody.innerHTML = '';
+            const months = ['Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const visitors = ['Devamlı', 'Yeni', 'Diğer'];
+            for (let i = 0; i < 8; i++) {
+                const proba = rand(0.05, 0.95, 3);
+                const label = proba >= 0.5 ? 1 : 0;
+                const tr = document.createElement('tr');
+                tr.style.animation = `fadeSlideUp ${0.3 + i * 0.05}s ease-out both`;
+                tr.innerHTML = `
+                    <td style="font-weight:600;color:var(--text-primary);font-family:monospace;font-size:12px;">S${100000 + Math.floor(Math.random() * 900000)}</td>
+                    <td>${months[Math.floor(Math.random() * months.length)]} · ${visitors[Math.floor(Math.random() * visitors.length)]}</td>
+                    <td><span class="chip ${label ? 'chip-positive' : 'chip-negative'}">${label ? '✓ Satın alır' : '✕ Almaz'}</span></td>
+                    <td><div class="proba-bar"><div class="proba-track"><div class="proba-fill ${proba >= 0.5 ? 'high' : 'low'}" style="width:${proba * 100}%"></div></div><span class="proba-text" style="color:${proba >= 0.5 ? '#16a34a' : 'var(--red)'}">${(proba * 100).toFixed(1)}%</span></div></td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createSparkline('spark-1', 'rgba(255,107,107,1)', Array.from({ length: 12 }, () => rand(2.5, 5, 1)));
+            createSparkline('spark-2', 'rgba(59,130,246,1)', Array.from({ length: 12 }, () => rand(14000, 22000)));
+            createSparkline('spark-3', 'rgba(20,184,166,1)', Array.from({ length: 12 }, () => rand(0.3, 0.55, 2)));
+            createSparkline('spark-4', 'rgba(245,158,11,1)', Array.from({ length: 12 }, () => rand(200, 450)));
+            initCharts();
+            renderRecentPredictions();
+        });
+    </script>
+</body>
+
+</html>

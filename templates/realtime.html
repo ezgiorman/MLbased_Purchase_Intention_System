@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerçek Zamanlı Tahminler – PurchasePredict</title>
+    <meta name="description"
+        content="E-ticaret satın alma niyeti tahmini. Gerçek zamanlı oturum verileri ile anlık ML skorlama." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f8f9fc;
+            --bg-white: #ffffff;
+            --bg-soft: #f1f3f8;
+            --bg-sidebar: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            --coral: #ff6b6b;
+            --coral-soft: rgba(255, 107, 107, 0.10);
+            --amber: #f59e0b;
+            --amber-soft: rgba(245, 158, 11, 0.10);
+            --teal: #14b8a6;
+            --teal-soft: rgba(20, 184, 166, 0.10);
+            --blue: #3b82f6;
+            --blue-soft: rgba(59, 130, 246, 0.10);
+            --purple: #8b5cf6;
+            --purple-soft: rgba(139, 92, 246, 0.10);
+            --pink: #ec4899;
+            --pink-soft: rgba(236, 72, 153, 0.10);
+            --green: #22c55e;
+            --green-soft: rgba(34, 197, 94, 0.10);
+            --red: #ef4444;
+            --red-soft: rgba(239, 68, 68, 0.10);
+            --text-primary: #1e1b4b;
+            --text-secondary: #4b5563;
+            --text-tertiary: #9ca3af;
+            --text-muted: #d1d5db;
+            --border-light: rgba(0, 0, 0, 0.06);
+            --border-default: rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
+            --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.05);
+            --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-full: 999px;
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-w: 264px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--bg-sidebar);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform .4s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 8px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--coral), var(--amber));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 107, 107, .4);
+        }
+
+        .logo-text-main {
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .logo-text-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .55);
+        }
+
+        .nav-section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            color: rgba(255, 255, 255, .35);
+            padding: 16px 12px 6px;
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: rgba(255, 255, 255, .65);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .nav-link .icon {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, .08);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, .12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, .2);
+        }
+
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            border-radius: 0 4px 4px 0;
+            background: linear-gradient(180deg, var(--coral), var(--amber));
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 12px 4px;
+            border-top: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .sidebar-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: var(--radius-full);
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, .6);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(74, 222, 128, .5)
+            }
+
+            50% {
+                box-shadow: 0 0 16px rgba(74, 222, 128, .9)
+            }
+        }
+
+        .sidebar-status span {
+            font-size: 12px;
+            font-weight: 500;
+            color: #4ade80;
+        }
+
+        .sidebar-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .35);
+            line-height: 1.5;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            padding: 28px 32px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            background: var(--green-soft);
+            border: 1px solid rgba(34, 197, 94, .2);
+            color: #16a34a;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .live-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: #22c55e;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            border: 1px solid var(--border-default);
+            background: var(--bg-white);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--purple);
+            color: var(--purple);
+        }
+
+        /* CONTENT */
+        .content {
+            padding: 24px 32px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex: 1;
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 20px;
+            animation: fadeSlideUp .5s ease-out;
+        }
+
+        /* TABLE CARD */
+        .table-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        .table-card-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .table-subtitle {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .badge-count {
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--purple-soft);
+            color: var(--purple);
+            border: 1px solid rgba(139, 92, 246, .15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-soft);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        tbody tr {
+            transition: background var(--transition-fast);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-soft);
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .chip-positive {
+            background: var(--green-soft);
+            color: #16a34a;
+        }
+
+        .chip-negative {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .proba-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .proba-track {
+            flex: 1;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: var(--bg-soft);
+            overflow: hidden;
+        }
+
+        .proba-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width .8s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .proba-fill.high {
+            background: linear-gradient(90deg, var(--teal), var(--green));
+        }
+
+        .proba-fill.low {
+            background: linear-gradient(90deg, var(--coral), var(--red));
+        }
+
+        .proba-text {
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 42px;
+            text-align: right;
+        }
+
+        /* FORM */
+        .form-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            height: fit-content;
+            position: sticky;
+            top: 24px;
+        }
+
+        .form-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .form-title {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .form-subtitle {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-field.full {
+            grid-column: 1/-1;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-default);
+            background: var(--bg-soft);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px var(--purple-soft);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        .form-select option {
+            background: var(--bg-white);
+            color: var(--text-primary);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-default);
+            background: var(--bg-soft);
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .toggle-switch {
+            width: 40px;
+            height: 22px;
+            border-radius: var(--radius-full);
+            background: var(--text-muted);
+            position: relative;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .toggle-switch.active {
+            background: var(--purple);
+        }
+
+        .toggle-knob {
+            width: 18px;
+            height: 18px;
+            border-radius: var(--radius-full);
+            background: #fff;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(18px);
+        }
+
+        .btn-predict {
+            width: 100%;
+            margin-top: 8px;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: none;
+            background: linear-gradient(135deg, var(--purple), #7c3aed);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, .35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-predict::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .15), transparent);
+            transition: left .5s;
+        }
+
+        .btn-predict:hover::before {
+            left: 100%;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(139, 92, 246, .5);
+        }
+
+        .btn-predict:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-card {
+            margin-top: 16px;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-soft);
+            display: none;
+            animation: fadeSlideUp .4s ease-out;
+        }
+
+        .result-card.visible {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .result-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .result-label-text {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .result-label-sub {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .result-proba-bar {
+            height: 8px;
+            border-radius: var(--radius-full);
+            background: var(--bg-body);
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .result-proba-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 1s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .result-proba-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-top: 8px;
+            letter-spacing: -.02em;
+        }
+
+        .result-proba-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .error-text {
+            font-size: 12px;
+            color: var(--red);
+            margin-top: 12px;
+            display: none;
+        }
+
+        .error-text.visible {
+            display: block;
+        }
+
+        .footer {
+            padding: 16px 32px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer a {
+            color: var(--purple);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--bg-white);
+            border: 1px solid var(--border-default);
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: var(--radius-full);
+            animation: spin .6s linear infinite;
+            display: none;
+        }
+
+        .btn-predict.loading .spinner {
+            display: block;
+        }
+
+        .btn-predict.loading .btn-text {
+            display: none;
+        }
+
+        @media(max-width:1024px) {
+            .page-grid {
+                grid-template-columns: 1fr
+            }
+
+            .form-card {
+                position: static
+            }
+        }
+
+        @media(max-width:768px) {
+            .sidebar {
+                transform: translateX(-100%)
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: var(--shadow-lg)
+            }
+
+            .main {
+                margin-left: 0
+            }
+
+            .mobile-menu-btn {
+                display: flex
+            }
+
+            .header,
+            .content,
+            .footer {
+                padding-left: 16px;
+                padding-right: 16px
+            }
+
+            .header {
+                padding-top: 56px
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: var(--radius-full)
+        }
+    </style>
+    <script>if (window.self !== window.top) { var s = document.createElement('style'); s.textContent = '.sidebar,.mobile-menu-btn{display:none!important}.main{margin-left:0!important}'; document.head.appendChild(s) }</script>
+</head>
+
+<body>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç">☰</button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-icon">P</div>
+            <div>
+                <div class="logo-text-main">PurchasePredict</div>
+                <div class="logo-text-sub">Intelligence Suite</div>
+            </div>
+        </div>
+        <div>
+            <div class="nav-section-title">Ana Menü</div>
+            <ul class="nav-list">
+                <li><a href="/dashboard" class="nav-link"><span class="icon">📊</span>Genel Bakış</a></li>
+                <li><a href="/realtime" class="nav-link active"><span class="icon">⚡</span>Gerçek Zamanlı</a></li>
+                <li><a href="/analytics" class="nav-link"><span class="icon">📈</span>Analitik</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="nav-section-title">Araçlar</div>
+            <ul class="nav-list">
+                <li><a href="/realtime" class="nav-link"><span class="icon">🔮</span>Tekil Tahmin</a></li>
+                <li><a href="/analytics" class="nav-link"><span class="icon">🧪</span>A/B Test Raporu</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-status">
+                <div class="status-dot"></div><span>Model API aktif</span>
+            </div>
+            <p class="sidebar-desc">Gerçek zamanlı tahmin skorlarını izleyin ve tekil oturum tahmini yapın.</p>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div class="header-left">
+                <h1>Gerçek Zamanlı Tahmin Akışı</h1>
+                <p>Oturum verilerini girerek anlık satın alma tahmini alın veya son skorlanan oturumları izleyin.</p>
+                <div class="live-badge"><span class="dot"></span>Canlı skorlama aktif</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <a class="btn" href="/dashboard">📊 Panele Dön</a>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="page-grid">
+                <div class="table-card">
+                    <div class="table-card-header">
+                        <div>
+                            <div class="table-title">Son Tahmin Edilen Oturumlar</div>
+                            <div class="table-subtitle">Model tarafından skorlanan son 20 oturum</div>
+                        </div>
+                        <span class="badge-count">20 oturum</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Oturum ID</th>
+                                    <th>Ay / Ziyaretçi</th>
+                                    <th>Tahmin</th>
+                                    <th>Olasılık</th>
+                                    <th>Sayfa Değeri</th>
+                                    <th>Çıkış Oranı</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-predictions-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <div>
+                            <div class="form-title">🔮 Tekil Tahmin</div>
+                            <div class="form-subtitle">Oturum verilerini girip model tahminini alın</div>
+                        </div>
+                    </div>
+                    <form id="predictForm" autocomplete="off">
+                        <div class="form-grid">
+                            <div class="form-field"><label class="form-label">Administrative <span
+                                        class="form-hint">Sayfa sayısı</span></label><input class="form-input"
+                                    type="number" name="Administrative" value="0" min="0" id="f-admin" /></div>
+                            <div class="form-field"><label class="form-label">Admin Süre <span
+                                        class="form-hint">sn</span></label><input class="form-input" type="number"
+                                    name="Administrative_Duration" value="0" step="0.1" id="f-admin-dur" /></div>
+                            <div class="form-field"><label class="form-label">Informational <span
+                                        class="form-hint">Sayfa sayısı</span></label><input class="form-input"
+                                    type="number" name="Informational" value="0" min="0" id="f-info" /></div>
+                            <div class="form-field"><label class="form-label">Info Süre <span
+                                        class="form-hint">sn</span></label><input class="form-input" type="number"
+                                    name="Informational_Duration" value="0" step="0.1" id="f-info-dur" /></div>
+                            <div class="form-field"><label class="form-label">ProductRelated <span
+                                        class="form-hint">Sayfa sayısı</span></label><input class="form-input"
+                                    type="number" name="ProductRelated" value="30" min="0" id="f-prod" /></div>
+                            <div class="form-field"><label class="form-label">Product Süre <span
+                                        class="form-hint">sn</span></label><input class="form-input" type="number"
+                                    name="ProductRelated_Duration" value="600" step="0.1" id="f-prod-dur" /></div>
+                            <div class="form-field"><label class="form-label">BounceRates</label><input
+                                    class="form-input" type="number" name="BounceRates" value="0.02" step="0.001"
+                                    id="f-bounce" /></div>
+                            <div class="form-field"><label class="form-label">ExitRates</label><input class="form-input"
+                                    type="number" name="ExitRates" value="0.05" step="0.001" id="f-exit" /></div>
+                            <div class="form-field"><label class="form-label">PageValues</label><input
+                                    class="form-input" type="number" name="PageValues" value="10" step="0.1"
+                                    id="f-page" /></div>
+                            <div class="form-field"><label class="form-label">SpecialDay</label><input
+                                    class="form-input" type="number" name="SpecialDay" value="0" step="0.1" min="0"
+                                    max="1" id="f-special" /></div>
+                            <div class="form-field"><label class="form-label">Month</label>
+                                <select class="form-select" name="Month" id="f-month">
+                                    <option value="Feb">Şubat</option>
+                                    <option value="Mar" selected>Mart</option>
+                                    <option value="May">Mayıs</option>
+                                    <option value="Jun">Haziran</option>
+                                    <option value="Jul">Temmuz</option>
+                                    <option value="Aug">Ağustos</option>
+                                    <option value="Sep">Eylül</option>
+                                    <option value="Oct">Ekim</option>
+                                    <option value="Nov">Kasım</option>
+                                    <option value="Dec">Aralık</option>
+                                </select>
+                            </div>
+                            <div class="form-field"><label class="form-label">VisitorType</label>
+                                <select class="form-select" name="VisitorType" id="f-visitor">
+                                    <option value="Returning_Visitor" selected>Devamlı Müşteri</option>
+                                    <option value="New_Visitor">Yeni Müşteri</option>
+                                    <option value="Other">Diğer</option>
+                                </select>
+                            </div>
+                            <div class="form-field"><label class="form-label">OS / Browser / Region</label>
+                                <div style="display:flex;gap:6px;">
+                                    <input class="form-input" type="number" name="OperatingSystems" value="2" min="1"
+                                        max="8" style="flex:1;" id="f-os" />
+                                    <input class="form-input" type="number" name="Browser" value="2" min="1" max="13"
+                                        style="flex:1;" id="f-browser" />
+                                    <input class="form-input" type="number" name="Region" value="1" min="1" max="9"
+                                        style="flex:1;" id="f-region" />
+                                </div>
+                            </div>
+                            <div class="form-field"><label class="form-label">TrafficType</label><input
+                                    class="form-input" type="number" name="TrafficType" value="2" min="1" max="20"
+                                    id="f-traffic" /></div>
+                            <div class="form-field full">
+                                <div class="toggle-row"><span class="toggle-label">Hafta Sonu mu?</span>
+                                    <div class="toggle-switch" id="weekendToggle" role="switch" aria-checked="false"
+                                        tabindex="0">
+                                        <div class="toggle-knob"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-predict" id="btnPredict"><span class="btn-text">⚡ Tahmin
+                                Et</span>
+                            <div class="spinner"></div>
+                        </button>
+                    </form>
+                    <div class="error-text" id="errorText"></div>
+                    <div class="result-card" id="resultCard">
+                        <div class="result-header">
+                            <div class="result-icon" id="resultIcon">🎯</div>
+                            <div>
+                                <div class="result-label-text" id="resultLabel">—</div>
+                                <div class="result-label-sub">Model tahmini</div>
+                            </div>
+                        </div>
+                        <div class="result-proba-bar">
+                            <div class="result-proba-fill" id="resultFill" style="width:0%;"></div>
+                        </div>
+                        <div class="result-proba-value" id="resultProba">—</div>
+                        <div class="result-proba-label">Satın alma olasılığı</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="footer"><span>PurchasePredict Intelligence Suite © 2026</span><span>Powered by <a
+                    href="#">FastAPI</a> & <a href="#">XGBoost</a></span></footer>
+    </main>
+
+    <script src="/static/realtime.js"></script>
+</body>
+
+</html>

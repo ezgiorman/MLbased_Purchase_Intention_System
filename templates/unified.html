@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PurchasePredict – Intelligence Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f8f9fc;
+            --bg-white: #fff;
+            --bg-soft: #f1f3f8;
+            --bg-sidebar: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            --coral: #ff6b6b;
+            --amber: #f59e0b;
+            --purple: #8b5cf6;
+            --green: #22c55e;
+            --green-soft: rgba(34, 197, 94, .1);
+            --text-primary: #1e1b4b;
+            --text-secondary: #4b5563;
+            --text-tertiary: #9ca3af;
+            --border-light: rgba(0, 0, 0, .06);
+            --border-default: rgba(0, 0, 0, .08);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, .04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, .06);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, .08);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-full: 999px;
+            --transition-fast: .15s cubic-bezier(.4, 0, .2, 1);
+            --sidebar-w: 264px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform .4s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 8px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            margin-bottom: 8px
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--coral), var(--amber));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 107, 107, .4)
+        }
+
+        .logo-text-main {
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff
+        }
+
+        .logo-text-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .55)
+        }
+
+        .nav-section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            color: rgba(255, 255, 255, .35);
+            padding: 16px 12px 6px;
+            font-weight: 600
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: rgba(255, 255, 255, .65);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: 1px solid transparent;
+            position: relative;
+            cursor: pointer
+        }
+
+        .nav-link .icon {
+            width: 20px;
+            text-align: center;
+            font-size: 14px
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, .08);
+            color: #fff
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, .12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, .2)
+        }
+
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            border-radius: 0 4px 4px 0;
+            background: linear-gradient(180deg, var(--coral), var(--amber))
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 12px 4px;
+            border-top: 1px solid rgba(255, 255, 255, .1)
+        }
+
+        .sidebar-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: var(--radius-full);
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, .6);
+            animation: pulse-dot 2s ease-in-out infinite
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(74, 222, 128, .5)
+            }
+
+            50% {
+                box-shadow: 0 0 16px rgba(74, 222, 128, .9)
+            }
+        }
+
+        .sidebar-status span {
+            font-size: 12px;
+            font-weight: 500;
+            color: #4ade80
+        }
+
+        .sidebar-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .35);
+            line-height: 1.5
+        }
+
+        .main-frame {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            height: 100vh;
+            border: none;
+            background: var(--bg-body)
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--bg-white);
+            border: 1px solid var(--border-default);
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            align-items: center;
+            justify-content: center
+        }
+
+        @media(max-width:768px) {
+            .sidebar {
+                transform: translateX(-100%)
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: var(--shadow-lg)
+            }
+
+            .main-frame {
+                margin-left: 0;
+                width: 100%
+            }
+
+            .mobile-menu-btn {
+                display: flex
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç">☰</button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-icon">P</div>
+            <div>
+                <div class="logo-text-main">PurchasePredict</div>
+                <div class="logo-text-sub">Intelligence Suite</div>
+            </div>
+        </div>
+        <div>
+            <div class="nav-section-title">Ana Menü</div>
+            <ul class="nav-list">
+                <li><a class="nav-link active" data-page="dashboard" onclick="navigate('dashboard',this)"><span
+                            class="icon">📊</span>Genel Bakış</a></li>
+                <li><a class="nav-link" data-page="realtime" onclick="navigate('realtime',this)"><span
+                            class="icon">⚡</span>Gerçek Zamanlı</a></li>
+                <li><a class="nav-link" data-page="analytics" onclick="navigate('analytics',this)"><span
+                            class="icon">📈</span>Analitik</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="nav-section-title">Araçlar</div>
+            <ul class="nav-list">
+                <li><a class="nav-link" data-page="realtime" onclick="navigate('realtime',this)"><span
+                            class="icon">🔮</span>Tekil Tahmin</a></li>
+                <li><a class="nav-link" data-page="analytics" onclick="navigate('analytics',this)"><span
+                            class="icon">🧪</span>A/B Test Raporu</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-status">
+                <div class="status-dot"></div><span>Model API aktif</span>
+            </div>
+            <p class="sidebar-desc">XGBoost tabanlı satın alma tahmin modeli ile gerçek zamanlı veri analizi.</p>
+        </div>
+    </aside>
+
+    <iframe class="main-frame" id="contentFrame" src="/page/dashboard"></iframe>
+
+    <script>
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        function navigate(page, el) {
+            document.getElementById('contentFrame').src = '/page/' + page;
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            // Activate all links matching this page
+            document.querySelectorAll(`.nav-link[data-page="${page}"]`).forEach(l => l.classList.add('active'));
+            // Close mobile menu
+            document.getElementById('sidebar').classList.remove('open');
+            // Update browser URL without reload
+            history.pushState(null, '', '/' + page);
+        }
+
+        // Handle browser back/forward
+        window.addEventListener('popstate', () => {
+            const page = location.pathname.replace('/', '') || 'dashboard';
+            const link = document.querySelector(`.nav-link[data-page="${page}"]`);
+            if (link) navigate(page, link);
+        });
+
+        // Load correct page based on URL
+        (function () {
+            const path = location.pathname.replace('/', '') || 'dashboard';
+            const validPages = ['dashboard', 'realtime', 'analytics'];
+            const page = validPages.includes(path) ? path : 'dashboard';
+            document.getElementById('contentFrame').src = '/page/' + page;
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll(`.nav-link[data-page="${page}"]`).forEach(l => l.classList.add('active'));
+        })();
+    </script>
+</body>
+
+</html>

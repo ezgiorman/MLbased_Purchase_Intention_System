@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analitik & Kohort – PurchasePredict</title>
+    <meta name="description" content="Kohort analizi, feature importance ve segment bazlı davranış metrikleri." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-body: #f8f9fc;
+            --bg-white: #ffffff;
+            --bg-soft: #f1f3f8;
+            --bg-sidebar: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            --coral: #ff6b6b;
+            --coral-soft: rgba(255, 107, 107, 0.10);
+            --amber: #f59e0b;
+            --amber-soft: rgba(245, 158, 11, 0.10);
+            --teal: #14b8a6;
+            --teal-soft: rgba(20, 184, 166, 0.10);
+            --blue: #3b82f6;
+            --blue-soft: rgba(59, 130, 246, 0.10);
+            --purple: #8b5cf6;
+            --purple-soft: rgba(139, 92, 246, 0.10);
+            --pink: #ec4899;
+            --pink-soft: rgba(236, 72, 153, 0.10);
+            --green: #22c55e;
+            --green-soft: rgba(34, 197, 94, 0.10);
+            --red: #ef4444;
+            --red-soft: rgba(239, 68, 68, 0.10);
+            --text-primary: #1e1b4b;
+            --text-secondary: #4b5563;
+            --text-tertiary: #9ca3af;
+            --text-muted: #d1d5db;
+            --border-light: rgba(0, 0, 0, 0.06);
+            --border-default: rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
+            --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.05);
+            --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-full: 999px;
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-w: 264px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--bg-sidebar);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform .4s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 8px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--coral), var(--amber));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 107, 107, .4);
+        }
+
+        .logo-text-main {
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .logo-text-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .55);
+        }
+
+        .nav-section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            color: rgba(255, 255, 255, .35);
+            padding: 16px 12px 6px;
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: rgba(255, 255, 255, .65);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .nav-link .icon {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, .08);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, .12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, .2);
+        }
+
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            border-radius: 0 4px 4px 0;
+            background: linear-gradient(180deg, var(--coral), var(--amber));
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 12px 4px;
+            border-top: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .sidebar-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: var(--radius-full);
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, .6);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(74, 222, 128, .5)
+            }
+
+            50% {
+                box-shadow: 0 0 16px rgba(74, 222, 128, .9)
+            }
+        }
+
+        .sidebar-status span {
+            font-size: 12px;
+            font-weight: 500;
+            color: #4ade80;
+        }
+
+        .sidebar-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .35);
+            line-height: 1.5;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            padding: 28px 32px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            max-width: 600px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            border: 1px solid var(--border-default);
+            background: var(--bg-white);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--purple);
+            color: var(--purple);
+        }
+
+        /* CONTENT */
+        .content {
+            padding: 24px 32px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex: 1;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            animation: fadeSlideUp .4s ease-out;
+        }
+
+        .summary-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-card);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .summary-card:nth-child(1)::before {
+            background: linear-gradient(90deg, var(--coral), var(--pink));
+        }
+
+        .summary-card:nth-child(2)::before {
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+        }
+
+        .summary-card:nth-child(3)::before {
+            background: linear-gradient(90deg, var(--teal), var(--green));
+        }
+
+        .summary-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .summary-value {
+            font-size: 30px;
+            font-weight: 800;
+            margin-top: 4px;
+            letter-spacing: -.02em;
+        }
+
+        .summary-sub {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        .summary-card:nth-child(1) .summary-value {
+            color: var(--coral);
+        }
+
+        .summary-card:nth-child(2) .summary-value {
+            color: var(--blue);
+        }
+
+        .summary-card:nth-child(3) .summary-value {
+            color: var(--teal);
+        }
+
+        /* Charts */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            animation: fadeSlideUp .6s ease-out;
+        }
+
+        .chart-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-base);
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .chart-card.full {
+            grid-column: 1/-1;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .chart-subtitle {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .chart-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--purple-soft);
+            border: 1px solid rgba(139, 92, 246, .15);
+            color: var(--purple);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+        }
+
+        /* Heatmap */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: auto repeat(11, 1fr);
+            gap: 3px;
+            font-size: 11px;
+        }
+
+        .heatmap-cell {
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 4px;
+            font-weight: 600;
+            transition: all var(--transition-fast);
+            cursor: default;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.08);
+            z-index: 2;
+            box-shadow: var(--shadow-md);
+        }
+
+        .heatmap-header {
+            color: var(--text-tertiary);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .heatmap-label {
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 600;
+            text-align: right;
+            padding-right: 8px;
+        }
+
+        /* Segments */
+        .segment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            animation: fadeSlideUp 1s ease-out;
+        }
+
+        .segment-card {
+            border-radius: var(--radius-lg);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            padding: 22px;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-base);
+        }
+
+        .segment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .segment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .segment-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .segment-name {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .segment-name-sub {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .segment-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+        }
+
+        .segment-stat-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .segment-stat-value {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .footer {
+            padding: 16px 32px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer a {
+            color: var(--purple);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--bg-white);
+            border: 1px solid var(--border-default);
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @media(max-width:1200px) {
+
+            .summary-grid,
+            .charts-row,
+            .segment-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:768px) {
+            .sidebar {
+                transform: translateX(-100%)
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: var(--shadow-lg)
+            }
+
+            .main {
+                margin-left: 0
+            }
+
+            .mobile-menu-btn {
+                display: flex
+            }
+
+            .header,
+            .content,
+            .footer {
+                padding-left: 16px;
+                padding-right: 16px
+            }
+
+            .header {
+                padding-top: 56px
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: var(--radius-full)
+        }
+    </style>
+    <script>if (window.self !== window.top) { var s = document.createElement('style'); s.textContent = '.sidebar,.mobile-menu-btn{display:none!important}.main{margin-left:0!important}'; document.head.appendChild(s) }</script>
+</head>
+
+<body>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç">☰</button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-icon">P</div>
+            <div>
+                <div class="logo-text-main">PurchasePredict</div>
+                <div class="logo-text-sub">Intelligence Suite</div>
+            </div>
+        </div>
+        <div>
+            <div class="nav-section-title">Ana Menü</div>
+            <ul class="nav-list">
+                <li><a href="/dashboard" class="nav-link"><span class="icon">📊</span>Genel Bakış</a></li>
+                <li><a href="/realtime" class="nav-link"><span class="icon">⚡</span>Gerçek Zamanlı</a></li>
+                <li><a href="/analytics" class="nav-link active"><span class="icon">📈</span>Analitik</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="nav-section-title">Araçlar</div>
+            <ul class="nav-list">
+                <li><a href="/realtime" class="nav-link"><span class="icon">🔮</span>Tekil Tahmin</a></li>
+                <li><a href="/analytics" class="nav-link"><span class="icon">🧪</span>A/B Test Raporu</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-status">
+                <div class="status-dot"></div><span>Model API aktif</span>
+            </div>
+            <p class="sidebar-desc">Kohort analizi ve feature importance detayları.</p>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div class="header-left">
+                <h1>Analitik & Kohort Raporu</h1>
+                <p>Segment bazlı satın alma niyetleri, feature importance analizi ve kohort kırılımları.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <a class="btn" href="/dashboard">📊 Panele Dön</a>
+                <a class="btn" href="/realtime">⚡ Canlı Tahminler</a>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- SUMMARY -->
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon">🧠</div>
+                    <div class="summary-label">En Etkili Feature</div>
+                    <div class="summary-value">Sayfa Değeri</div>
+                    <div class="summary-sub">Feature importance: 0.34 — Model kararını en çok etkileyen değişken</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">📅</div>
+                    <div class="summary-label">En Yüksek Dönüşüm Ayı</div>
+                    <div class="summary-value">Kasım</div>
+                    <div class="summary-sub">Black Friday etkisi ile %12.3 dönüşüm oranı</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">👤</div>
+                    <div class="summary-label">En Değerli Segment</div>
+                    <div class="summary-value">Devamlı</div>
+                    <div class="summary-sub">Geri dönen müşteriler %16 satın alma oranı ile lider</div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW 1 -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Feature Importance</div>
+                            <div class="chart-subtitle">XGBoost model — En etkili 10 feature</div>
+                        </div>
+                        <div class="chart-badge">🧠 ML Model</div>
+                    </div>
+                    <div class="chart-container"><canvas id="chart-importance"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Aylık Satın Alma Trendi</div>
+                            <div class="chart-subtitle">Ay bazında tahmin edilen satın alma oranları</div>
+                        </div>
+                        <div class="chart-badge">📅 Aylık</div>
+                    </div>
+                    <div class="chart-container"><canvas id="chart-monthly"></canvas></div>
+                </div>
+            </div>
+
+            <!-- HEATMAP -->
+            <div class="chart-card" style="animation:fadeSlideUp .8s ease-out;">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Kohort Isı Haritası — Ay × Ziyaretçi Tipi</div>
+                        <div class="chart-subtitle">Satın alma oranının segment ve ay kesişimindeki yoğunluğu</div>
+                    </div>
+                    <div class="chart-badge">🔥 Heatmap</div>
+                </div>
+                <div class="heatmap-grid" id="heatmap"></div>
+            </div>
+
+            <!-- CHARTS ROW 2 -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Traffic Kaynağına Göre Dönüşüm</div>
+                            <div class="chart-subtitle">TrafficType bazlı satın alma oranları</div>
+                        </div>
+                        <div class="chart-badge">🌐 Trafik</div>
+                    </div>
+                    <div class="chart-container"><canvas id="chart-traffic"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Bounce vs Exit Oranı Karşılaştırması</div>
+                            <div class="chart-subtitle">Satın alanlar vs. almayanlar arasındaki fark</div>
+                        </div>
+                        <div class="chart-badge">📉 Davranış</div>
+                    </div>
+                    <div class="chart-container"><canvas id="chart-bounce-exit"></canvas></div>
+                </div>
+            </div>
+
+            <!-- SEGMENTS -->
+            <div class="segment-grid">
+                <div class="segment-card">
+                    <div class="segment-header">
+                        <div class="segment-icon" style="background:var(--purple-soft);">👤</div>
+                        <div>
+                            <div class="segment-name">Devamlı Müşteri</div>
+                            <div class="segment-name-sub">Returning Visitor</div>
+                        </div>
+                    </div>
+                    <div class="segment-stat"><span class="segment-stat-label">Satın Alma Oranı</span><span
+                            class="segment-stat-value" style="color:#16a34a;">%15.8</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Ort. Oturum Süresi</span><span
+                            class="segment-stat-value">12.4 dk</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Ort. Sayfa Değeri</span><span
+                            class="segment-stat-value">24.6</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Toplam Oturum</span><span
+                            class="segment-stat-value">10.425</span></div>
+                </div>
+                <div class="segment-card">
+                    <div class="segment-header">
+                        <div class="segment-icon" style="background:var(--coral-soft);">🆕</div>
+                        <div>
+                            <div class="segment-name">Yeni Müşteri</div>
+                            <div class="segment-name-sub">New Visitor</div>
+                        </div>
+                    </div>
+                    <div class="segment-stat"><span class="segment-stat-label">Satın Alma Oranı</span><span
+                            class="segment-stat-value" style="color:var(--amber);">%5.9</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Ort. Oturum Süresi</span><span
+                            class="segment-stat-value">6.2 dk</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Ort. Sayfa Değeri</span><span
+                            class="segment-stat-value">8.3</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Toplam Oturum</span><span
+                            class="segment-stat-value">6.890</span></div>
+                </div>
+                <div class="segment-card">
+                    <div class="segment-header">
+                        <div class="segment-icon" style="background:var(--blue-soft);">🔄</div>
+                        <div>
+                            <div class="segment-name">Diğer</div>
+                            <div class="segment-name-sub">Other</div>
+                        </div>
+                    </div>
+                    <div class="segment-stat"><span class="segment-stat-label">Satın Alma Oranı</span><span
+                            class="segment-stat-value" style="color:var(--red);">%2.8</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Ort. Oturum Süresi</span><span
+                            class="segment-stat-value">3.1 dk</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Ort. Sayfa Değeri</span><span
+                            class="segment-stat-value">3.2</span></div>
+                    <div class="segment-stat"><span class="segment-stat-label">Toplam Oturum</span><span
+                            class="segment-stat-value">1.105</span></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer"><span>PurchasePredict Intelligence Suite © 2026</span><span>Powered by <a
+                    href="#">FastAPI</a> & <a href="#">Chart.js</a></span></footer>
+    </main>
+
+    <script>
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('open') });
+        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.color = '#9ca3af';
+        const tooltipStyle = { backgroundColor: '#1e1b4b', borderColor: 'rgba(139,92,246,.3)', borderWidth: 1, titleColor: '#fff', bodyColor: '#c4b5fd', padding: 12, cornerRadius: 10, titleFont: { size: 13, weight: '600', family: 'Inter' }, bodyFont: { size: 12, family: 'Inter' } };
+        const gridStyle = { color: 'rgba(0,0,0,0.04)', drawBorder: false };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Feature Importance
+            const importanceLabels = ['Sayfa Değeri', 'Ürün Sayfası Süresi', 'Çıkış Oranı', 'Hemen Çıkma Oranı', 'Yönetim Sayfası Süresi', 'Kasım Ayı', 'Bilgi Sayfası Süresi', 'Ürün Sayfası Sayısı', 'Trafik Türü', 'Yeni Ziyaretçi'];
+            const importanceData = [.34, .14, .11, .09, .07, .06, .05, .04, .03, .02];
+            const colors = ['#ff6b6b', '#ec4899', '#8b5cf6', '#3b82f6', '#06b6d4', '#14b8a6', '#22c55e', '#84cc16', '#f59e0b', '#f97316'];
+
+            new Chart(document.getElementById('chart-importance'), {
+                type: 'bar',
+                data: { labels: importanceLabels, datasets: [{ data: importanceData, backgroundColor: colors.map(c => c + 'cc'), borderColor: colors, borderWidth: 2, borderRadius: 8, barPercentage: .7 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tooltipStyle, callbacks: { label: ctx => `Importance: ${ctx.parsed.x.toFixed(2)}` } } }, scales: { x: { ticks: { color: '#9ca3af', font: { size: 11 } }, grid: gridStyle }, y: { ticks: { color: '#4b5563', font: { size: 11, weight: '600' } }, grid: { display: false } } }, animation: { duration: 1500, easing: 'easeInOutQuart' } }
+            });
+
+            // Monthly
+            const months = ['Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const mData = [3.2, 4.1, 3.8, 5.2, 4.5, 3.9, 4.7, 5.8, 6.2, 12.3, 8.1];
+            const g1 = document.getElementById('chart-monthly').getContext('2d').createLinearGradient(0, 0, 0, 280);
+            g1.addColorStop(0, 'rgba(20,184,166,0.20)'); g1.addColorStop(1, 'rgba(20,184,166,0)');
+
+            new Chart(document.getElementById('chart-monthly'), {
+                type: 'line',
+                data: { labels: months, datasets: [{ label: 'Satın Alma Oranı (%)', data: mData, borderColor: '#14b8a6', backgroundColor: g1, tension: .4, fill: true, pointRadius: 5, pointHoverRadius: 8, pointBackgroundColor: '#14b8a6', pointBorderColor: '#fff', pointBorderWidth: 2, borderWidth: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' }, plugins: { legend: { display: false }, tooltip: { ...tooltipStyle, callbacks: { label: ctx => `Oran: %${ctx.parsed.y.toFixed(1)}` } } }, scales: { x: { ticks: { color: '#9ca3af', font: { size: 11 } }, grid: gridStyle }, y: { ticks: { color: '#9ca3af', font: { size: 11 }, callback: v => `%${v}` }, grid: gridStyle, suggestedMin: 0, suggestedMax: 15 } }, animation: { duration: 1500, easing: 'easeInOutQuart' } }
+            });
+
+            // Traffic
+            const tLabels = ['Organik', 'Direkt', 'Sosyal', 'Referral', 'E-posta', 'Reklam'];
+            const tData = [6.2, 4.8, 3.1, 7.5, 8.3, 5.6];
+            new Chart(document.getElementById('chart-traffic'), {
+                type: 'bar',
+                data: { labels: tLabels, datasets: [{ label: 'Dönüşüm (%)', data: tData, backgroundColor: ['#8b5cf6cc', '#3b82f6cc', '#ec4899cc', '#14b8a6cc', '#f59e0bcc', '#ff6b6bcc'], borderColor: ['#8b5cf6', '#3b82f6', '#ec4899', '#14b8a6', '#f59e0b', '#ff6b6b'], borderWidth: 2, borderRadius: 10, barPercentage: .6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tooltipStyle, callbacks: { label: ctx => `Dönüşüm: %${ctx.parsed.y.toFixed(1)}` } } }, scales: { x: { ticks: { color: '#9ca3af', font: { size: 11 } }, grid: { display: false } }, y: { ticks: { color: '#9ca3af', font: { size: 11 }, callback: v => `%${v}` }, grid: gridStyle, suggestedMin: 0, suggestedMax: 12 } }, animation: { duration: 1500, easing: 'easeInOutQuart' } }
+            });
+
+            // Bounce vs Exit
+            new Chart(document.getElementById('chart-bounce-exit'), {
+                type: 'bar',
+                data: { labels: ['Bounce Rate', 'Exit Rate'], datasets: [{ label: 'Satın Alanlar', data: [1.8, 3.2], backgroundColor: 'rgba(20,184,166,.7)', borderColor: '#14b8a6', borderWidth: 2, borderRadius: 10, barPercentage: .5 }, { label: 'Satın Almayanlar', data: [4.5, 5.8], backgroundColor: 'rgba(255,107,107,.7)', borderColor: '#ff6b6b', borderWidth: 2, borderRadius: 10, barPercentage: .5 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#4b5563', font: { size: 12, weight: '600' }, padding: 16, usePointStyle: true, pointStyleWidth: 10 } }, tooltip: { ...tooltipStyle, callbacks: { label: ctx => `${ctx.dataset.label}: %${ctx.parsed.y.toFixed(1)}` } } }, scales: { x: { ticks: { color: '#9ca3af', font: { size: 11 } }, grid: { display: false } }, y: { ticks: { color: '#9ca3af', font: { size: 11 }, callback: v => `%${v}` }, grid: gridStyle } }, animation: { duration: 1500, easing: 'easeInOutQuart' } }
+            });
+
+            // Heatmap
+            buildHeatmap();
+        });
+
+        function buildHeatmap() {
+            const c = document.getElementById('heatmap'); if (!c) return;
+            const months = ['Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const segs = ['Devamlı', 'Yeni', 'Diğer'];
+            const data = { 'Devamlı': [10.2, 12.1, 11.5, 14.8, 13.2, 11.8, 13.9, 16.1, 17.4, 24.8, 18.3], 'Yeni': [3.1, 4.2, 3.8, 5.6, 4.8, 3.9, 5.1, 6.2, 6.8, 11.2, 7.5], 'Diğer': [1.2, 1.8, 1.5, 2.4, 2.1, 1.6, 2.3, 2.8, 3.1, 5.2, 3.4] };
+
+            // Header
+            const empty = document.createElement('div'); empty.className = 'heatmap-header'; c.appendChild(empty);
+            months.forEach(m => { const el = document.createElement('div'); el.className = 'heatmap-cell heatmap-header'; el.textContent = m; c.appendChild(el) });
+
+            // Rows
+            const palette = ['#8b5cf6', '#3b82f6', '#14b8a6'];
+            segs.forEach((seg, si) => {
+                const lbl = document.createElement('div'); lbl.className = 'heatmap-cell heatmap-label'; lbl.textContent = seg; c.appendChild(lbl);
+                data[seg].forEach(val => {
+                    const cell = document.createElement('div'); cell.className = 'heatmap-cell';
+                    const intensity = Math.min(val / 25, 1);
+                    const baseColor = palette[si];
+                    cell.style.background = baseColor + (Math.round((0.1 + intensity * 0.6) * 255).toString(16).padStart(2, '0'));
+                    cell.style.color = intensity > .4 ? '#fff' : 'var(--text-secondary)';
+                    cell.textContent = `${val.toFixed(1)}%`;
+                    cell.title = `${seg} → %${val.toFixed(1)}`;
+                    c.appendChild(cell);
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
