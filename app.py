@@ -1,7 +1,7 @@
 import pickle
 import pandas as pd
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -68,9 +68,10 @@ def preprocess_one(features: PurchaseFeatures):
     return X_ready
 
 
+
 @app.get("/")
-def health():
-    return {"status": "ok", "message": "Purchase Intention Model API is running."}
+def root():
+    return RedirectResponse(url="/dashboard")
 
 
 @app.post("/predict")
