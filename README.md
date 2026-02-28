@@ -48,7 +48,7 @@ User session data (page visit counts, duration, bounce rate, exit rate, page val
 ## 📸 Screenshots
 
 ### 📊 Overview – Dashboard
-> Conversion rate, active sessions, sparkline charts, and monthly trend analysis.
+> Conversion rate, active sessions, sparkline charts, monthly trends, and visitor type distribution.
 
 ![Dashboard](screenshots/dashboard.png)
 
@@ -61,10 +61,17 @@ User session data (page visit counts, duration, bounce rate, exit rate, page val
 
 ---
 
-### 📈 Analytics & Cohort Report
-> Feature importance, most influential variables, segment breakdowns, and cohort analysis.
+### 📈 Analytics & Cohort Report – Feature Importance
+> Summary cards, XGBoost feature importance chart, and monthly purchase trend analysis.
 
-![Analytics](screenshots/analytics.png)
+![Analytics Top](screenshots/analytics_top.png)
+
+---
+
+### 🔥 Analytics – Cohort Heatmap & Traffic Analysis
+> Cohort heatmap by month × visitor type, traffic source conversion rates, and bounce vs exit rate comparison.
+
+![Analytics Bottom](screenshots/analytics_bottom.png)
 
 ---
 
@@ -217,7 +224,8 @@ PurchasePrediction/
 └── screenshots/                  # README images
     ├── dashboard.png
     ├── realtime.png
-    └── analytics.png
+    ├── analytics_top.png
+    └── analytics_bottom.png
 ```
 
 ---
