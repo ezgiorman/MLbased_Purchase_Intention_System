@@ -8,123 +8,123 @@
 <h1 align="center">🛒 PurchasePredict – Intelligence Suite</h1>
 
 <p align="center">
-  <strong>E-ticaret oturum verilerinden satın alma niyeti tahmini yapan,<br>makine öğrenmesi destekli gerçek zamanlı analiz paneli.</strong>
+  <strong>An ML-powered real-time analytics dashboard that predicts<br>online purchase intention from e-commerce session data.</strong>
 </p>
 
 <p align="center">
-  <a href="#-özellikler">Özellikler</a> •
-  <a href="#-ekran-görüntüleri">Ekran Görüntüleri</a> •
-  <a href="#-teknolojiler">Teknolojiler</a> •
-  <a href="#-kurulum">Kurulum</a> •
-  <a href="#-api-kullanımı">API Kullanımı</a> •
-  <a href="#-proje-yapısı">Proje Yapısı</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-screenshots">Screenshots</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-api-usage">API Usage</a> •
+  <a href="#-project-structure">Project Structure</a> •
   <a href="#-deployment">Deployment</a>
 </p>
 
 ---
 
-## 📌 Proje Hakkında
+## 📌 About
 
-**PurchasePredict**, [UCI Online Shoppers Purchasing Intention](https://archive.ics.uci.edu/ml/datasets/Online+Shoppers+Purchasing+Intention+Dataset) veri setine dayalı olarak eğitilmiş bir **XGBoost** sınıflandırıcı modeli kullanarak, e-ticaret sitesindeki ziyaretçilerin **satın alma yapıp yapmayacağını** tahmin eden uçtan uca bir makine öğrenmesi uygulamasıdır.
+**PurchasePredict** is an end-to-end machine learning application that predicts **whether an e-commerce visitor will make a purchase** using an **XGBoost** classifier trained on the [UCI Online Shoppers Purchasing Intention](https://archive.ics.uci.edu/ml/datasets/Online+Shoppers+Purchasing+Intention+Dataset) dataset.
 
-Kullanıcının oturum verileri (sayfa ziyaret sayısı, süre, bounce rate, exit rate, sayfa değeri, ziyaretçi tipi vb.) modele girdi olarak verilir ve gerçek zamanlı olarak **satın alma olasılığı** döndürülür.
-
----
-
-## ✨ Özellikler
-
-| Özellik | Açıklama |
-|---------|----------|
-| 📊 **Genel Bakış Paneli** | Dönüşüm oranı, günlük aktif oturum, ortalama satın alma olasılığı ve aylık trend grafikleri |
-| ⚡ **Gerçek Zamanlı Tahmin** | Anlık oturum verisi girişi ile tekil satın alma tahmini ve olasılık skoru |
-| 📈 **Analitik & Kohort Raporu** | Feature importance, aylık dönüşüm trendi, kohort ısı haritası, trafik kaynağı analizi |
-| 🔮 **Tekil Tahmin Formu** | 17 farklı feature ile detaylı tahmin yapma imkanı |
-| 🧪 **A/B Test Görünümü** | Bounce vs Exit oranı karşılaştırması, segment bazlı davranış metrikleri |
-| 📱 **Responsive Tasarım** | Mobil ve masaüstü uyumlu, modern glassmorphism arayüz |
-| 🟢 **REST API** | FastAPI tabanlı `/predict` endpoint'i ile programatik erişim |
+User session data (page visit counts, duration, bounce rate, exit rate, page value, visitor type, etc.) is fed into the model, and a real-time **purchase probability** is returned.
 
 ---
 
-## 📸 Ekran Görüntüleri
+## ✨ Features
 
-### 📊 Genel Bakış – Dashboard
-> Dönüşüm oranı, aktif oturumlar, sparkline grafikler ve aylık trend analizi.
+| Feature | Description |
+|---------|-------------|
+| 📊 **Overview Dashboard** | Conversion rate, daily active sessions, average purchase probability, and monthly trend charts |
+| ⚡ **Real-Time Prediction** | Instant purchase prediction and probability score via live session data input |
+| 📈 **Analytics & Cohort Report** | Feature importance, monthly conversion trends, cohort heatmap, traffic source analysis |
+| 🔮 **Single Prediction Form** | Detailed prediction using 17 different features |
+| 🧪 **A/B Test View** | Bounce vs Exit rate comparison, segment-based behavioral metrics |
+| 📱 **Responsive Design** | Mobile and desktop compatible with a modern glassmorphism interface |
+| 🟢 **REST API** | Programmatic access via FastAPI-based `/predict` endpoint |
+
+---
+
+## 📸 Screenshots
+
+### 📊 Overview – Dashboard
+> Conversion rate, active sessions, sparkline charts, and monthly trend analysis.
 
 ![Dashboard](screenshots/dashboard.png)
 
 ---
 
-### ⚡ Gerçek Zamanlı Tahmin
-> Son skorlanan oturumlar tablosu ve tekil tahmin formu ile anlık ML tahminleri.
+### ⚡ Real-Time Prediction
+> Recently scored sessions table and single prediction form for instant ML predictions.
 
 ![Realtime](screenshots/realtime.png)
 
 ---
 
-### 📈 Analitik & Kohort Raporu
-> Feature importance, en etkili değişkenler, segment kırılımları ve kohort analizi.
+### 📈 Analytics & Cohort Report
+> Feature importance, most influential variables, segment breakdowns, and cohort analysis.
 
 ![Analytics](screenshots/analytics.png)
 
 ---
 
-## 🛠 Teknolojiler
+## 🛠 Tech Stack
 
 ### Backend
-- **[FastAPI](https://fastapi.tiangolo.com/)** – Yüksek performanslı async Python web framework
-- **[XGBoost](https://xgboost.readthedocs.io/)** – Gradient boosting tabanlı ML sınıflandırıcı
-- **[scikit-learn](https://scikit-learn.org/)** – Veri ön işleme ve feature scaling
-- **[Pandas](https://pandas.pydata.org/)** – Veri manipülasyonu ve one-hot encoding
-- **[Pydantic](https://docs.pydantic.dev/)** – Request/Response veri doğrulama
+- **[FastAPI](https://fastapi.tiangolo.com/)** – High-performance async Python web framework
+- **[XGBoost](https://xgboost.readthedocs.io/)** – Gradient boosting-based ML classifier
+- **[scikit-learn](https://scikit-learn.org/)** – Data preprocessing and feature scaling
+- **[Pandas](https://pandas.pydata.org/)** – Data manipulation and one-hot encoding
+- **[Pydantic](https://docs.pydantic.dev/)** – Request/Response data validation
 
 ### Frontend
-- **HTML5 / CSS3 / JavaScript** – Sıfırdan tasarlanmış modern UI
-- **[Chart.js](https://www.chartjs.org/)** – İnteraktif grafikler ve veri görselleştirme
-- **[Inter Font](https://fonts.google.com/specimen/Inter)** – Premium tipografi
+- **HTML5 / CSS3 / JavaScript** – Custom-built modern UI from scratch
+- **[Chart.js](https://www.chartjs.org/)** – Interactive charts and data visualization
+- **[Inter Font](https://fonts.google.com/specimen/Inter)** – Premium typography
 
 ### DevOps
-- **[Uvicorn](https://www.uvicorn.org/)** – ASGI sunucu
+- **[Uvicorn](https://www.uvicorn.org/)** – ASGI server
 - **[Render](https://render.com/)** – Cloud deployment
 
 ---
 
-## 🚀 Kurulum
+## 🚀 Getting Started
 
-### Gereksinimler
+### Prerequisites
 
 - Python 3.10+
 - pip
 
-### Adımlar
+### Installation
 
 ```bash
-# 1. Repoyu klonlayın
+# 1. Clone the repository
 git clone https://github.com/ezgiorman/MLbased_Purchase_Intention_System.git
 cd MLbased_Purchase_Intention_System
 
-# 2. Sanal ortam oluşturun (opsiyonel ama önerilir)
+# 2. Create a virtual environment (optional but recommended)
 python -m venv .venv
 # Windows:
 .venv\Scripts\activate
 # macOS/Linux:
 source .venv/bin/activate
 
-# 3. Bağımlılıkları yükleyin
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Uygulamayı çalıştırın
+# 4. Run the application
 uvicorn app:app --reload
 ```
 
-Tarayıcınızda **http://127.0.0.1:8000** adresine gidin. 🎉
+Open your browser and navigate to **http://127.0.0.1:8000** 🎉
 
 ---
 
-## 📡 API Kullanımı
+## 📡 API Usage
 
 ### `POST /predict`
 
-Oturum verilerini göndererek satın alma tahmini alın.
+Send session data to get a purchase prediction.
 
 **Request Body:**
 
@@ -159,12 +159,12 @@ Oturum verilerini göndererek satın alma tahmini alın.
 }
 ```
 
-| Alan | Açıklama |
-|------|----------|
-| `purchase_probability` | Satın alma olasılığı (0-1 arası) |
-| `predicted_label` | Tahmin sonucu: `1` = Satın alır, `0` = Satın almaz |
+| Field | Description |
+|-------|-------------|
+| `purchase_probability` | Purchase probability (between 0 and 1) |
+| `predicted_label` | Prediction result: `1` = Will purchase, `0` = Will not purchase |
 
-### cURL Örneği
+### cURL Example
 
 ```bash
 curl -X POST http://127.0.0.1:8000/predict \
@@ -190,31 +190,31 @@ curl -X POST http://127.0.0.1:8000/predict \
   }'
 ```
 
-> 💡 **İpucu:** FastAPI otomatik dökümantasyonu için **http://127.0.0.1:8000/docs** adresini ziyaret edin.
+> 💡 **Tip:** Visit **http://127.0.0.1:8000/docs** for the auto-generated FastAPI Swagger documentation.
 
 ---
 
-## 📂 Proje Yapısı
+## 📂 Project Structure
 
 ```
 PurchasePrediction/
-├── app.py                        # FastAPI uygulama & API endpoint'leri
-├── model_tests.py                # Model doğrulama ve test scripti
-├── purchase_xgb_complete.pkl     # Eğitilmiş XGBoost model dosyası
-├── requirements.txt              # Python bağımlılıkları
-├── Procfile                      # Render deployment komutu
+├── app.py                        # FastAPI application & API endpoints
+├── model_tests.py                # Model validation and test script
+├── purchase_xgb_complete.pkl     # Trained XGBoost model file
+├── requirements.txt              # Python dependencies
+├── Procfile                      # Render deployment command
 ├── .gitignore
 │
 ├── templates/
-│   ├── unified.html              # Ana layout (sidebar + iframe navigasyon)
-│   ├── index.html                # Dashboard sayfası (grafikler & metrikler)
-│   ├── realtime.html             # Gerçek zamanlı tahmin sayfası
-│   └── analytics.html            # Analitik & kohort raporu sayfası
+│   ├── unified.html              # Main layout (sidebar + iframe navigation)
+│   ├── index.html                # Dashboard page (charts & metrics)
+│   ├── realtime.html             # Real-time prediction page
+│   └── analytics.html            # Analytics & cohort report page
 │
 ├── static/
-│   └── realtime.js               # Gerçek zamanlı tahmin JS mantığı
+│   └── realtime.js               # Real-time prediction JS logic
 │
-└── screenshots/                  # README görselleri
+└── screenshots/                  # README images
     ├── dashboard.png
     ├── realtime.png
     └── analytics.png
@@ -222,68 +222,68 @@ PurchasePrediction/
 
 ---
 
-## 🧠 Model Detayları
+## 🧠 Model Details
 
-| Özellik | Değer |
-|---------|-------|
-| **Algoritma** | XGBoost Classifier |
-| **Veri Seti** | UCI Online Shoppers Purchasing Intention |
-| **Feature Sayısı** | 17 (ham) → one-hot encoding sonrası genişler |
-| **Ön İşleme** | One-hot encoding + StandardScaler |
-| **Hedef Değişken** | `Revenue` (satın alma: 1 / almama: 0) |
+| Property | Value |
+|----------|-------|
+| **Algorithm** | XGBoost Classifier |
+| **Dataset** | UCI Online Shoppers Purchasing Intention |
+| **Number of Features** | 17 (raw) → expands after one-hot encoding |
+| **Preprocessing** | One-hot encoding + StandardScaler |
+| **Target Variable** | `Revenue` (purchase: 1 / no purchase: 0) |
 
-### Kullanılan Feature'lar
+### Input Features
 
-| Feature | Tip | Açıklama |
-|---------|-----|----------|
-| `Administrative` | int | Ziyaret edilen yönetim sayfası sayısı |
-| `Administrative_Duration` | float | Yönetim sayfalarında geçirilen süre (sn) |
-| `Informational` | int | Ziyaret edilen bilgi sayfası sayısı |
-| `Informational_Duration` | float | Bilgi sayfalarında geçirilen süre (sn) |
-| `ProductRelated` | int | Ziyaret edilen ürün sayfası sayısı |
-| `ProductRelated_Duration` | float | Ürün sayfalarında geçirilen süre (sn) |
-| `BounceRates` | float | Tek sayfa ziyaret oranı |
-| `ExitRates` | float | Sayfadan çıkış oranı |
-| `PageValues` | float | Sayfanın ortalama değeri |
-| `SpecialDay` | float | Özel güne yakınlık (0-1) |
-| `Month` | str | Ziyaret ayı |
-| `OperatingSystems` | int | İşletim sistemi kodu |
-| `Browser` | int | Tarayıcı kodu |
-| `Region` | int | Bölge kodu |
-| `TrafficType` | int | Trafik kaynağı kodu |
-| `VisitorType` | str | Ziyaretçi tipi (Returning/New/Other) |
-| `Weekend` | bool | Hafta sonu ziyareti mi? |
+| Feature | Type | Description |
+|---------|------|-------------|
+| `Administrative` | int | Number of administrative pages visited |
+| `Administrative_Duration` | float | Time spent on administrative pages (sec) |
+| `Informational` | int | Number of informational pages visited |
+| `Informational_Duration` | float | Time spent on informational pages (sec) |
+| `ProductRelated` | int | Number of product-related pages visited |
+| `ProductRelated_Duration` | float | Time spent on product-related pages (sec) |
+| `BounceRates` | float | Single-page visit rate |
+| `ExitRates` | float | Page exit rate |
+| `PageValues` | float | Average page value |
+| `SpecialDay` | float | Proximity to a special day (0–1) |
+| `Month` | str | Month of the visit |
+| `OperatingSystems` | int | Operating system code |
+| `Browser` | int | Browser code |
+| `Region` | int | Region code |
+| `TrafficType` | int | Traffic source code |
+| `VisitorType` | str | Visitor type (Returning / New / Other) |
+| `Weekend` | bool | Whether the visit is on a weekend |
 
 ---
 
 ## ☁️ Deployment
 
-Proje **Render.com** üzerinde deploy edilmek üzere yapılandırılmıştır.
+The project is configured for deployment on **Render.com**.
 
-### Render Ayarları
+### Render Settings
 
-| Ayar | Değer |
-|------|-------|
+| Setting | Value |
+|---------|-------|
 | **Environment** | Python 3 |
 | **Build Command** | `pip install -r requirements.txt` |
 | **Start Command** | `uvicorn app:app --host 0.0.0.0 --port $PORT` |
 
-### Manuel Deploy
+### Manual Deployment
 
 ```bash
-# Render.com'da yeni bir Web Service oluşturun
-# GitHub reponuzu bağlayın
-# Build ve Start komutlarını yukarıdaki gibi ayarlayın
+# Create a new Web Service on Render.com
+# Connect your GitHub repository
+# Set the Build and Start commands as shown above
 ```
 
 ---
 
-## 📄 Lisans
+## 📄 License
 
-Bu proje **MIT Lisansı** ile lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
 <p align="center">
-  <strong>⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!</strong>
+  <strong>⭐ If you found this project useful, don't forget to give it a star!</strong>
 </p>
