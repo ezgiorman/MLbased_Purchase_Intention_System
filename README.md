@@ -123,7 +123,7 @@ pip install -r requirements.txt
 uvicorn app:app --reload
 ```
 
-Open your browser and navigate to **http://127.0.0.1:8000** 🎉
+Open your browser and navigate to **http://127.0.0.1:8000** 
 
 ---
 
